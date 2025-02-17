@@ -1,0 +1,3 @@
+This project is a Google Docs sidebar where an LLM proactively makes suggestions to the user.
+Based on the template https://github.com/enuchi/React-Google-Apps-Script.
+After making a change, run tests and commit if they pass.
