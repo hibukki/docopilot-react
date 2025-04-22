@@ -1,7 +1,9 @@
+import { Typography } from '@mui/material';
+
 const About = () => (
   <div>
     <p>
-      <b>☀️ React app inside a sidebar! ☀️</b>
+      <b>☀️ React app inside a sidebar! omg ☀️</b>
     </p>
     <p>
       This is a very simple page demonstrating how to build a React app inside a
@@ -18,6 +20,9 @@ const About = () => (
     >
       React + Google Apps Script
     </a>
+    <Typography variant="h4" gutterBottom>
+      MUI demo!
+    </Typography>
   </div>
 );
 
