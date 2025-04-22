@@ -1,6 +1,5 @@
 import { onOpen, openAboutSidebar, openDialogMUI } from './ui';
 
-import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
 import {
   queryLLM,
   getGeminiApiKey,
@@ -8,6 +7,9 @@ import {
   getUserPrompt,
   setUserPrompt,
   getCurrentPrompt,
+  listAvailableModels,
+  getGeminiModel,
+  setGeminiModel,
 } from './llms';
 import {
   getComments,
@@ -21,10 +23,6 @@ export {
   onOpen,
   openDialogMUI,
   openAboutSidebar,
-  getSheetsData,
-  addSheet,
-  deleteSheet,
-  setActiveSheet,
   queryLLM,
   getComments,
   getGeminiApiKey,
@@ -35,4 +33,7 @@ export {
   docopilotTick,
   getFocusedQuote,
   onSidebarCommentSetFocus,
+  listAvailableModels,
+  getGeminiModel,
+  setGeminiModel,
 };
