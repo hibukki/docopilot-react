@@ -54,9 +54,6 @@ const Docopilot = () => {
           </Paper>
         ))
       )}
-      <Typography variant="h4" gutterBottom>
-        MUI demo!
-      </Typography>
     </div>
   );
 };
