@@ -4,8 +4,8 @@ const getUi = () => {
 
 export const onOpen = () => {
   const menu = getUi()
-    .createMenu('My Sample React Project') // edit me!
-    .addItem('Sidebar', 'openAboutSidebar');
+    .createMenu('Docopilot')
+    .addItem('Open Sidebar', 'openAboutSidebar');
 
   menu.addToUi();
 };
