@@ -1,4 +1,4 @@
-import { Typography, Paper, useTheme, Box } from '@mui/material';
+import { Typography, Paper, useTheme, Box, Button } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 
@@ -17,14 +17,24 @@ const Comments = ({ onError }) => {
   };
 
   useEffect(() => {
-    fetchComments();
-  }, []);
+    fetchComments(); // Fetch immediately on mount
+    // const intervalId = setInterval(fetchComments, 1000); // Fetch every second
+
+    // return () => {
+    //   clearInterval(intervalId); // Clear interval on unmount
+    // };
+  });
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="subtitle1" gutterBottom>
-        Comments
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
+          Comments
+        </Typography>
+        <Button variant="outlined" size="small" onClick={fetchComments}>
+          Refresh
+        </Button>
+      </Box>
       {comments.length === 0 ? (
         <Typography variant="body2" color="textSecondary">
           No comments found.
