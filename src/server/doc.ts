@@ -11,8 +11,8 @@ export const getCursorPosition = (): GoogleAppsScript.Document.Position => {
   return cursor;
 };
 
-const HIGHLIGHT_COLOR = '#FFFF00'; // Yellow
-const FOCUSED_HIGHLIGHT_COLOR = '#FFD700'; // Gold
+const HIGHLIGHT_COLOR = '#FFF8C4'; // Light yellow/orange
+const FOCUSED_HIGHLIGHT_COLOR = '#FFD54F'; // A slightly more orange/yellow, similar to Docs focus
 
 // Helper function to apply highlight
 const applyHighlight = (
