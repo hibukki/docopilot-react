@@ -8,6 +8,7 @@ const Comments = ({ onError }) => {
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
 
   const fetchComments = () => {
+    console.log('Fetching comments');
     serverFunctions
       .getComments()
       .then((response) => setComments(response.comments))
@@ -23,7 +24,7 @@ const Comments = ({ onError }) => {
     // return () => {
     //   clearInterval(intervalId); // Clear interval on unmount
     // };
-  });
+  }, []);
 
   return (
     <Box sx={{ mt: 2 }}>

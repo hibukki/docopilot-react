@@ -1,3 +1,5 @@
+import { getDocText } from './doc';
+
 import { queryLLM, getGeminiApiKey, getCurrentPrompt } from './llms';
 
 export type Comment = {
@@ -37,9 +39,6 @@ const llmResponseSchema = {
   },
   required: ['thinking', 'comments'],
 };
-
-let lastDocumentTextCache: string | null = null;
-let lastCommentsCache: GetCommentsResponse = emptyComments;
 
 const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   const apiKey = getGeminiApiKey();
@@ -89,24 +88,50 @@ export const docopilotMainLoop = () => {
 };
 
 export const getComments = (): GetCommentsResponse => {
-  const currentDocumentText = DocumentApp.getActiveDocument()
-    .getBody()
-    .getText();
+  const currentDocumentText = getDocText();
+  const scriptProperties = PropertiesService.getScriptProperties();
+  const cachedDocumentText = scriptProperties.getProperty(
+    'lastDocumentTextCache'
+  );
+  const cachedCommentsString =
+    scriptProperties.getProperty('lastCommentsCache');
 
   // Check cache
-  if (
-    currentDocumentText === lastDocumentTextCache &&
-    lastCommentsCache !== null // Ensure cache is populated
-  ) {
-    console.log('Returning cached comments.');
-    return lastCommentsCache;
+  if (currentDocumentText === cachedDocumentText && cachedCommentsString) {
+    console.log('Returning cached comments from PropertiesService.');
+    try {
+      const cachedComments: GetCommentsResponse =
+        JSON.parse(cachedCommentsString);
+      // Basic validation to ensure it matches the expected structure
+      if (cachedComments && Array.isArray(cachedComments.comments)) {
+        return cachedComments;
+      }
+      // If structure is invalid, log error and proceed to fetch new comments
+      console.error('Cached comments structure is invalid.');
+    } catch (e) {
+      console.error('Error parsing cached comments:', e);
+      // Proceed to fetch new comments if parsing fails
+    }
   }
 
-  console.log('Document changed, fetching new comments.');
-  lastDocumentTextCache = currentDocumentText;
+  console.log(
+    'Document changed or cache invalid/missing, fetching new comments.'
+  );
 
   const newComments = getCommentsFromLLM(currentDocumentText);
-  lastCommentsCache = newComments;
+
+  // Store in PropertiesService
+  try {
+    scriptProperties.setProperty('lastDocumentTextCache', currentDocumentText);
+    scriptProperties.setProperty(
+      'lastCommentsCache',
+      JSON.stringify(newComments)
+    );
+    console.log('Stored new comments in PropertiesService.');
+  } catch (e) {
+    // Log error if storing fails, but proceed with returning the new comments
+    console.error('Error storing comments in PropertiesService:', e);
+  }
 
   return newComments;
 };
