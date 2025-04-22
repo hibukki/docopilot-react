@@ -60,12 +60,12 @@ export const onQuoteChanged = (quote: string | null, source: CursorSource) => {
   if (previousFocusedQuote) {
     if (previousFocusedQuote.skipNextDocUpdate && source === 'document') {
       // If this is the duplicate update we expect from the doc, then this is the one we had to skip
-      if (previousFocusedQuote.quote === quote) {
-        setFocusedQuote({
-          ...previousFocusedQuote,
-          skipNextDocUpdate: false,
-        });
-      }
+      // if (previousFocusedQuote.quote === quote) {
+      setFocusedQuote({
+        ...previousFocusedQuote,
+        skipNextDocUpdate: false,
+      });
+      // }
 
       // Anyway don't listen to doc updates until the 'skip' is cleared
       return;
