@@ -22,23 +22,24 @@
 
 ## 📝 Table of Contents
 
-- [About](#about)
-- [Install](#install)
-  - [Prerequisites](#prerequisites)
-  - [Getting started](#getting-started)
-- [Deploy](#deploy)
-- [Local Development](#local-development)
-  - [Using React DevTools](#dev-tools)
-- [Usage](#usage)
+- [📝 Table of Contents](#-table-of-contents)
+- [🔎 About ](#-about-)
+- [🚜 Install ](#-install-)
+  - [Prerequisites ](#prerequisites-)
+  - [🏁 Getting started ](#-getting-started-)
+- [🚀 Deploy ](#-deploy-)
+- [🎈 Local Development ](#-local-development-)
+  - [🔍 Using React DevTools ](#-using-react-devtools-)
+- [⛏️ Usage ](#️-usage-)
   - [The included sample app](#the-included-sample-app)
-  - [Typescript](#new-typescript)
+  - [Typescript](#typescript)
   - [Adding packages](#adding-packages)
   - [Styles](#styles)
   - [Modifying scopes](#modifying-scopes)
   - [Calling server-side Google Apps Script functions](#calling-server-side-google-apps-script-functions)
-  - [Autocomplete](#Autocomplete)
-- [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
+  - [Autocomplete](#autocomplete)
+- [✍️ Authors ](#️-authors-)
+- [🎉 Acknowledgements ](#-acknowledgements-)
 
 <br/>
 
@@ -225,11 +226,7 @@ The included sample app allows inserting/activating/deleting sheets through a si
 
 The included sample app has five menu items that demonstrate how to load pages in various dialogs and sidebars. Sample implementations using different component libraries are included.
 
-- `Sheet Editor` - This is a basic app that opens in a dialog window that demonstrates how to select, create and delete sheets in a Google Sheets documents through server calls. It uses vanilla React with no component library.
-- `Sheet Editor (Boostrap)` - The same basic app is included but styled with the Bootstrap library using [`react-bootstrap`](https://react-bootstrap.github.io/). The bootstrap example also contains an example of a page built with typescript (see below).
 - `Sheet Editor (MUI)` - A similar example using [`Material UI`](https://mui.com/).
-- `Sheet Editor (Tailwind CSS)` - Another example, using [`Tailwind CSS`](https://tailwindcss.com/)
-- `About me` - This is just a simple page that demonstrates the use of a sidebar dialog.
 
 Access the dialogs through the new menu item that appears. You may need to refresh the spreadsheet and approve the app's permissions the first time you use it.
 
