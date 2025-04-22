@@ -7,6 +7,14 @@ export type GetCommentsResponse = {
   comments: Comment[];
 };
 
+export type LLMResponse = {
+  thinking: string;
+  comments: {
+    quote: string;
+    comment: string;
+  }[];
+};
+
 export const getComments = (): GetCommentsResponse => {
   return {
     comments: [
