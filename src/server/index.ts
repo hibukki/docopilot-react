@@ -1,7 +1,6 @@
 import { onOpen, openAboutSidebar, openDialogMUI } from './ui';
 
 import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
-
 import {
   queryLLM,
   getGeminiApiKey,
@@ -10,7 +9,7 @@ import {
   setUserPrompt,
   getCurrentPrompt,
 } from './llms';
-import { getComments } from './docopilot';
+import { getComments, docopilotTick, getFocusedQuote } from './docopilot';
 
 // Public functions must be exported as named exports
 export {
@@ -28,4 +27,6 @@ export {
   getUserPrompt,
   setUserPrompt,
   getCurrentPrompt,
+  docopilotTick,
+  getFocusedQuote,
 };

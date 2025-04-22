@@ -5,10 +5,10 @@ export const getDocText = () => {
   return text;
 };
 
-export const getCursorPosition = () => {
+export const getCursorPosition = (): GoogleAppsScript.Document.Position => {
   const doc = DocumentApp.getActiveDocument();
   const cursor = doc.getCursor();
-  return cursor.getOffset();
+  return cursor;
 };
 
 const HIGHLIGHT_COLOR = '#FFFF00'; // Yellow

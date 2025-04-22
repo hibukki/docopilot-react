@@ -10,7 +10,9 @@ import {
   setCachedComments,
   setCachedDocumentText,
   getCachedDocumentText,
+  setCachedCursorPosition,
 } from './script_properties';
+import { getCursorQuote, refreshCursorPosition } from './doc_cursor';
 
 export type LLMResponse = {
   thinking: string | null;
@@ -40,7 +42,12 @@ const llmResponseSchema = {
 };
 
 export const onGotNewLLMComments = (commentsResponse: GetCommentsResponse) => {
-  highlightCommentsInDoc(commentsResponse.comments.map((c) => c.quoted_text));
+  const quotes = commentsResponse.comments.map((c) => c.quoted_text);
+  refreshCursorPosition();
+
+  const quoteInFocus = null; // We didn't check yet if anything is in focus
+
+  highlightCommentsInDoc(quotes, quoteInFocus);
 };
 
 const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
@@ -81,11 +88,6 @@ const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   return commentsResponse;
 };
 
-export const docopilotMainLoop = () => {
-  // TODO: Every second,
-  // if the document text changed, prompt the LLM for comments and save them somewhere accessible for getComments to retrieve. This way getComments can immediately return instead of waiting for the LLM
-};
-
 export const getComments = (): GetCommentsResponse => {
   const currentDocumentText = getDocText();
   const cachedDocumentText = getCachedDocumentText();
@@ -103,4 +105,19 @@ export const getComments = (): GetCommentsResponse => {
   setCachedComments(newComments);
 
   return newComments;
+};
+
+export const getFocusedQuote = (): string | undefined => {
+  return getCursorQuote();
+};
+
+export const sidebarSetFocusedQuote = (quote: string) => {
+  setCachedCursorPosition({ quote, source: 'sidebar' });
+};
+
+// The frontend will call this every second or so
+export const docopilotTick = () => {
+  console.log('docopilotTick');
+  refreshCursorPosition();
+  getComments();
 };

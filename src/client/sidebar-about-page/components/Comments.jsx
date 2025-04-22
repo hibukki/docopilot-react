@@ -17,12 +17,19 @@ const Comments = ({ onError }) => {
       });
   };
 
+  const docopilotTick = () => {
+    console.log('Docopilot tick');
+    serverFunctions.docopilotTick();
+  };
+
   useEffect(() => {
     fetchComments(); // Fetch immediately on mount
-    const intervalId = setInterval(fetchComments, 1000); // Fetch every second
+    const commentsIntervalId = setInterval(fetchComments, 1000); // Fetch every second
+    const tickIntervalId = setInterval(docopilotTick, 1000); // Call every second (because this backend can't trigger itself)
 
     return () => {
-      clearInterval(intervalId); // Clear interval on unmount
+      clearInterval(commentsIntervalId);
+      clearInterval(tickIntervalId);
     };
   }, []);
 
