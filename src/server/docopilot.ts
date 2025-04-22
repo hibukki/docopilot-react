@@ -15,7 +15,6 @@ import {
   setCachedComments,
   setCachedDocumentText,
   getCachedDocumentText,
-  setCachedCursorPosition,
 } from './script_properties';
 import { getCursorQuote, refreshCursorPosition } from './doc_cursor';
 
@@ -117,10 +116,6 @@ export const getComments = (): GetCommentsResponse => {
 
 export const getFocusedQuote = (): string | undefined => {
   return getCursorQuote();
-};
-
-export const onSidebarCommentSetFocus = (quote: string) => {
-  setCachedCursorPosition({ quote, source: 'sidebar' });
 };
 
 // The frontend will call this every second or so

@@ -11,13 +11,8 @@ import {
   getGeminiModel,
   setGeminiModel,
 } from './llms';
-import {
-  getComments,
-  docopilotTick,
-  getFocusedQuote,
-  onSidebarCommentSetFocus,
-} from './docopilot';
-import { refreshCursorPosition } from './doc_cursor';
+import { getComments, docopilotTick, getFocusedQuote } from './docopilot';
+import { onSidebarCommentSetFocus, refreshCursorPosition } from './doc_cursor';
 
 // Public functions must be exported as named exports
 export {

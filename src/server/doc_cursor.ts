@@ -94,3 +94,19 @@ export const getCursorQuote = (): string | undefined => {
   }
   return cachedCursorPosition.quote;
 };
+
+export const onSidebarCommentSetFocus = (quote: string) => {
+  setCachedCursorPosition({ quote, source: 'sidebar' });
+
+  // Move cursor on the doc to the beginning of the quote
+  const doc = DocumentApp.getActiveDocument();
+  const body = doc.getBody();
+  const rangeElement = body.findText(quote);
+  if (rangeElement) {
+    const element = rangeElement.getElement();
+    const startOffset = rangeElement.getStartOffset();
+    // Create a position at the start of the found text
+    const position = doc.newPosition(element, startOffset);
+    doc.setCursor(position);
+  }
+};
