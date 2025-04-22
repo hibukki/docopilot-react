@@ -1,4 +1,4 @@
-import { getDocText } from './doc';
+import { getDocText, highlightCommentsInDoc } from './doc';
 
 import { queryLLM, getGeminiApiKey, getCurrentPrompt } from './llms';
 import {
@@ -13,7 +13,7 @@ import {
 } from './script_properties';
 
 export type LLMResponse = {
-  thinking: string;
+  thinking: string | null;
   comments: {
     quote: string;
     comment: string;
@@ -37,6 +37,10 @@ const llmResponseSchema = {
     },
   },
   required: ['thinking', 'comments'],
+};
+
+export const onGotNewLLMComments = (commentsResponse: GetCommentsResponse) => {
+  highlightCommentsInDoc(commentsResponse.comments.map((c) => c.quoted_text));
 };
 
 const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
@@ -65,12 +69,16 @@ const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   );
   const llmResponse: LLMResponse = JSON.parse(llmResponseString);
 
-  const comments = llmResponse.comments.map((c) => ({
-    quoted_text: c.quote,
-    comment_text: c.comment,
-  }));
+  const commentsResponse: GetCommentsResponse = {
+    comments: llmResponse.comments.map((c) => ({
+      quoted_text: c.quote,
+      comment_text: c.comment,
+    })),
+  };
 
-  return { comments };
+  onGotNewLLMComments(commentsResponse);
+
+  return commentsResponse;
 };
 
 export const docopilotMainLoop = () => {
