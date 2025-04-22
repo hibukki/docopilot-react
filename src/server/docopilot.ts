@@ -1,17 +1,16 @@
 import { getDocText } from './doc';
 
 import { queryLLM, getGeminiApiKey, getCurrentPrompt } from './llms';
-
-export type Comment = {
-  quoted_text: string;
-  comment_text: string;
-};
-
-export type GetCommentsResponse = {
-  comments: Comment[];
-};
-
-const emptyComments: GetCommentsResponse = { comments: [] };
+import {
+  GetCommentsResponse,
+  emptyComments,
+} from './get_comments_response_type';
+import {
+  getCachedComments,
+  setCachedComments,
+  setCachedDocumentText,
+  getCachedDocumentText,
+} from './script_properties';
 
 export type LLMResponse = {
   thinking: string;
@@ -38,27 +37,6 @@ const llmResponseSchema = {
     },
   },
   required: ['thinking', 'comments'],
-};
-
-const setCachedDocumentText = (text: string): void => {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('lastDocumentTextCache', text);
-};
-
-const getCachedComments = (): GetCommentsResponse | null => {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  const cachedCommentsString =
-    scriptProperties.getProperty('lastCommentsCache');
-  if (!cachedCommentsString) {
-    return null;
-  }
-  const cachedComments: GetCommentsResponse = JSON.parse(cachedCommentsString);
-  return cachedComments;
-};
-
-const setCachedComments = (comments: GetCommentsResponse): void => {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('lastCommentsCache', JSON.stringify(comments));
 };
 
 const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
@@ -102,10 +80,13 @@ export const docopilotMainLoop = () => {
 
 export const getComments = (): GetCommentsResponse => {
   const currentDocumentText = getDocText();
-  const cachedComments = getCachedComments();
+  const cachedDocumentText = getCachedDocumentText();
 
-  if (cachedComments) {
-    return cachedComments;
+  if (cachedDocumentText === currentDocumentText) {
+    const cachedComments = getCachedComments();
+    if (cachedComments) {
+      return cachedComments;
+    }
   }
 
   const newComments = getCommentsFromLLM(currentDocumentText);
