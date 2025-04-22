@@ -40,37 +40,25 @@ const llmResponseSchema = {
   required: ['thinking', 'comments'],
 };
 
-// Helper function to get cached data from PropertiesService
-const getCachedData = (): {
-  cachedDocumentText: string | null;
-  cachedComments: GetCommentsResponse | null;
-} => {
+const setCachedDocumentText = (text: string): void => {
   const scriptProperties = PropertiesService.getScriptProperties();
-  const cachedDocumentText = scriptProperties.getProperty(
-    'lastDocumentTextCache'
-  );
-  const cachedCommentsString =
-    scriptProperties.getProperty('lastCommentsCache');
-
-  if (!cachedCommentsString) {
-    return { cachedDocumentText, cachedComments: null };
-  }
-
-  // Let JSON.parse errors propagate
-  const cachedComments: GetCommentsResponse = JSON.parse(cachedCommentsString);
-  return { cachedDocumentText, cachedComments };
+  scriptProperties.setProperty('lastDocumentTextCache', text);
 };
 
-// Helper function to set cached data in PropertiesService
-const setCachedData = (
-  documentText: string,
-  comments: GetCommentsResponse
-): void => {
+const getCachedComments = (): GetCommentsResponse | null => {
   const scriptProperties = PropertiesService.getScriptProperties();
-  // Let setProperty errors propagate
-  scriptProperties.setProperty('lastDocumentTextCache', documentText);
+  const cachedCommentsString =
+    scriptProperties.getProperty('lastCommentsCache');
+  if (!cachedCommentsString) {
+    return null;
+  }
+  const cachedComments: GetCommentsResponse = JSON.parse(cachedCommentsString);
+  return cachedComments;
+};
+
+const setCachedComments = (comments: GetCommentsResponse): void => {
+  const scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty('lastCommentsCache', JSON.stringify(comments));
-  console.log('Stored new comments in PropertiesService.');
 };
 
 const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
@@ -91,28 +79,20 @@ const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   // TODO: Make model configurable?
   const model = 'gemini-1.5-flash-latest';
 
-  try {
-    const llmResponseString = queryLLM(
-      fullPrompt,
-      apiKey,
-      model,
-      llmResponseSchema
-    );
-    const llmResponse: LLMResponse = JSON.parse(llmResponseString);
+  const llmResponseString = queryLLM(
+    fullPrompt,
+    apiKey,
+    model,
+    llmResponseSchema
+  );
+  const llmResponse: LLMResponse = JSON.parse(llmResponseString);
 
-    // Log the thinking process for debugging or potential display
-    console.log(`LLM Thinking: ${llmResponse.thinking}`);
+  const comments = llmResponse.comments.map((c) => ({
+    quoted_text: c.quote,
+    comment_text: c.comment,
+  }));
 
-    const comments = llmResponse.comments.map((c) => ({
-      quoted_text: c.quote,
-      comment_text: c.comment,
-    }));
-
-    return { comments };
-  } catch (e) {
-    console.error('Error querying LLM or parsing response:', e);
-    return emptyComments;
-  }
+  return { comments };
 };
 
 export const docopilotMainLoop = () => {
@@ -122,26 +102,16 @@ export const docopilotMainLoop = () => {
 
 export const getComments = (): GetCommentsResponse => {
   const currentDocumentText = getDocText();
-  const { cachedDocumentText, cachedComments } = getCachedData();
+  const cachedComments = getCachedComments();
 
-  // Check cache
-  if (
-    currentDocumentText === cachedDocumentText &&
-    cachedComments &&
-    Array.isArray(cachedComments.comments) // Basic validation
-  ) {
-    console.log('Returning cached comments from PropertiesService.');
+  if (cachedComments) {
     return cachedComments;
   }
 
-  console.log(
-    'Document changed or cache invalid/missing, fetching new comments.'
-  );
-
   const newComments = getCommentsFromLLM(currentDocumentText);
 
-  // Store in PropertiesService using the helper function
-  setCachedData(currentDocumentText, newComments);
+  setCachedDocumentText(currentDocumentText);
+  setCachedComments(newComments);
 
   return newComments;
 };
