@@ -10,7 +10,7 @@ import {
   setUserPrompt,
   getCurrentPrompt,
 } from './llms';
-import { getComments, docopilotMainLoop } from './docopilot';
+import { getComments } from './docopilot';
 
 // Public functions must be exported as named exports
 export {
@@ -23,7 +23,6 @@ export {
   setActiveSheet,
   queryLLM,
   getComments,
-  docopilotMainLoop,
   getGeminiApiKey,
   setGeminiApiKey,
   getUserPrompt,
