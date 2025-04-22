@@ -5,19 +5,19 @@ Have an LLM proactively comment on your google doc while working, instead of pro
 ## Development
 
 ```shell
-npm install
+yarn install
 ```
 
 Log in to clasp (the cli for pushing code to things like google docs sidebars)
 
 ```shell
-npm run login
+yarn run login
 ```
 
 Create a new google doc connected to this script
 
 ```shell
-npm run setup
+yarn run setup
 ```
 
 (then open the google docs link that is created, though the code won't be there yet)
@@ -25,8 +25,12 @@ npm run setup
 Deploy the code
 
 ```shell
-npm run deploy
+yarn run deploy
 ```
+
+Refresh the Google Doc (now it should load the code you deployed).
+
+Use the "Docopilot" menu.
 
 ### For other useful commands
 
