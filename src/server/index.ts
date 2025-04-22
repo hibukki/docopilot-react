@@ -3,6 +3,7 @@ import { onOpen, openAboutSidebar, openDialogMUI } from './ui';
 import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
 
 import { queryLLM } from './llms';
+import { getComments, docopilotMainLoop } from './docopilot';
 
 // Public functions must be exported as named exports
 export {
@@ -14,4 +15,6 @@ export {
   deleteSheet,
   setActiveSheet,
   queryLLM,
+  getComments,
+  docopilotMainLoop,
 };
