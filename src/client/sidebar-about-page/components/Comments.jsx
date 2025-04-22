@@ -11,7 +11,7 @@ const Comments = ({ onError }) => {
     console.log('Fetching comments and focused quote');
     Promise.all([
       serverFunctions.getComments(),
-      serverFunctions.getFocusedQuote(),
+      serverFunctions.getCursorQuote(),
     ])
       .then(([commentsResponse, focusedQuote]) => {
         setComments(commentsResponse.comments);

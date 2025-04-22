@@ -1,11 +1,16 @@
-import { getCursorPosition, highlightCommentsInDoc } from './doc';
+import {
+  getCursorPosition as getDocCursorPosition,
+  highlightCommentsInDoc,
+} from './doc';
 import {
   //   getCachedCursorPosition,
   getCachedComments,
   CursorSource,
-  getCachedCursorPosition,
-  setCachedCursorPosition,
-  CursorPosition,
+  getCachedDocCursorPosition,
+  setCachedDocCursorPosition,
+  DocCursorPosition,
+  getFocusedQuote,
+  setFocusedQuote,
   //   setCachedCursorPosition,
 } from './script_properties';
 
@@ -49,9 +54,38 @@ const findQuoteIndexAtCursor = (
   return -1; // No matching quote found at cursor position
 };
 
-export const onCursorChanged = (
-  newCursor: GoogleAppsScript.Document.Position,
-  source: CursorSource
+export const onQuoteChanged = (quote: string | null, source: CursorSource) => {
+  const previousFocusedQuote = getFocusedQuote();
+
+  if (previousFocusedQuote) {
+    if (previousFocusedQuote.skipNextDocUpdate && source === 'document') {
+      // If this is the duplicate update we expect from the doc, then this is the one we had to skip
+      if (previousFocusedQuote.quote === quote) {
+        setFocusedQuote({
+          ...previousFocusedQuote,
+          skipNextDocUpdate: false,
+        });
+      }
+
+      // Anyway don't listen to doc updates until the 'skip' is cleared
+      return;
+    }
+  }
+
+  setFocusedQuote({
+    quote,
+    source,
+    skipNextDocUpdate: source === 'sidebar', // After an update from the sidebar, skip one quote
+  });
+
+  const allQuotes =
+    getCachedComments()?.comments.map((c) => c.quoted_text) ?? [];
+
+  highlightCommentsInDoc(allQuotes, quote);
+};
+
+export const onCursorChangedFromDoc = (
+  newCursor: GoogleAppsScript.Document.Position
 ) => {
   const cachedComments = getCachedComments();
   if (!cachedComments) {
@@ -62,41 +96,43 @@ export const onCursorChanged = (
   const quoteIndex = findQuoteIndexAtCursor(quotes, newCursor);
 
   const quoteInFocus = quoteIndex !== -1 ? quotes[quoteIndex] : null;
-  const currentCursorPosition: CursorPosition = {
-    quote: quoteInFocus ?? undefined,
-    offset: newCursor.getOffset(),
-    source,
-  };
 
-  const previousCursorPosition = getCachedCursorPosition();
-  if (previousCursorPosition === currentCursorPosition) {
-    return;
-  }
-
-  highlightCommentsInDoc(quotes, quoteInFocus);
-  setCachedCursorPosition(currentCursorPosition);
+  onQuoteChanged(quoteInFocus, 'document');
 };
 
 export const refreshCursorPosition = (): void => {
-  const cursor = getCursorPosition();
-  //   const cachedCursorPosition = getCachedCursorPosition();
-  //   if (cachedCursorPosition === cursor) {
-  //     // return;
-  //   }
-  //   setCachedCursorPosition(cursor);
-  onCursorChanged(cursor, 'document');
+  const cursor = getDocCursorPosition();
+
+  const currentCursorPosition: DocCursorPosition = {
+    offset: cursor.getOffset(),
+    source: 'document',
+  };
+
+  const cachedDocCursorPosition = getCachedDocCursorPosition();
+
+  // If doc cursor didn't change
+  if (
+    cachedDocCursorPosition &&
+    cachedDocCursorPosition.offset === currentCursorPosition.offset
+  ) {
+    return;
+  }
+  setCachedDocCursorPosition(currentCursorPosition);
+
+  onCursorChangedFromDoc(cursor);
 };
 
-export const getCursorQuote = (): string | undefined => {
-  const cachedCursorPosition = getCachedCursorPosition();
-  if (!cachedCursorPosition) {
-    return undefined;
+// Used by sidebar
+export const getCursorQuote = (): string | null => {
+  const focusedQuote = getFocusedQuote();
+  if (!focusedQuote) {
+    return null;
   }
-  return cachedCursorPosition.quote;
+  return focusedQuote.quote;
 };
 
 export const onSidebarCommentSetFocus = (quote: string) => {
-  setCachedCursorPosition({ quote, source: 'sidebar' });
+  onQuoteChanged(quote, 'sidebar');
 
   // Move cursor on the doc to the beginning of the quote
   const doc = DocumentApp.getActiveDocument();

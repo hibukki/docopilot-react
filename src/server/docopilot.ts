@@ -16,7 +16,7 @@ import {
   setCachedDocumentText,
   getCachedDocumentText,
 } from './script_properties';
-import { getCursorQuote, refreshCursorPosition } from './doc_cursor';
+import { refreshCursorPosition } from './doc_cursor';
 
 export type LLMResponse = {
   thinking: string | null;
@@ -112,10 +112,6 @@ export const getComments = (): GetCommentsResponse => {
   setCachedComments(newComments);
 
   return newComments;
-};
-
-export const getFocusedQuote = (): string | undefined => {
-  return getCursorQuote();
 };
 
 // The frontend will call this every second or so

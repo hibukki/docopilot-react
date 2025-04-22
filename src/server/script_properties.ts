@@ -8,6 +8,10 @@ export interface CursorPosition {
   source: CursorSource;
 }
 
+export interface DocCursorPosition extends CursorPosition {
+  source: 'document';
+}
+
 // Means document text that we generated comments for.
 export const setCachedDocumentText = (text: string): void => {
   const scriptProperties = PropertiesService.getScriptProperties();
@@ -35,7 +39,9 @@ export const setCachedComments = (comments: GetCommentsResponse): void => {
   scriptProperties.setProperty('lastCommentsCache', JSON.stringify(comments));
 };
 
-export const setCachedCursorPosition = (position: CursorPosition): void => {
+export const setCachedDocCursorPosition = (
+  position: DocCursorPosition
+): void => {
   const scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty(
     'lastCursorPositionCache',
@@ -43,7 +49,7 @@ export const setCachedCursorPosition = (position: CursorPosition): void => {
   );
 };
 
-export const getCachedCursorPosition = (): CursorPosition | null => {
+export const getCachedDocCursorPosition = (): DocCursorPosition | null => {
   const scriptProperties = PropertiesService.getScriptProperties();
   const cachedCursorPositionString = scriptProperties.getProperty(
     'lastCursorPositionCache'
@@ -52,5 +58,25 @@ export const getCachedCursorPosition = (): CursorPosition | null => {
     return null;
   }
   // TODO: Add validation for the parsed object
-  return JSON.parse(cachedCursorPositionString) as CursorPosition;
+  return JSON.parse(cachedCursorPositionString) as DocCursorPosition;
+};
+
+export type FocusedQuote = {
+  quote: string | null;
+  source: CursorSource;
+  skipNextDocUpdate: boolean;
+};
+
+export const setFocusedQuote = (quote: FocusedQuote): void => {
+  const scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty('focusedQuote', JSON.stringify(quote));
+};
+
+export const getFocusedQuote = (): FocusedQuote | null => {
+  const scriptProperties = PropertiesService.getScriptProperties();
+  const focusedQuoteString = scriptProperties.getProperty('focusedQuote');
+  if (!focusedQuoteString) {
+    return null;
+  }
+  return JSON.parse(focusedQuoteString) as FocusedQuote;
 };
