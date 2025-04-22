@@ -9,6 +9,8 @@ export type GetCommentsResponse = {
   comments: Comment[];
 };
 
+const emptyComments: GetCommentsResponse = { comments: [] };
+
 export type LLMResponse = {
   thinking: string;
   comments: {
@@ -36,7 +38,10 @@ const llmResponseSchema = {
   required: ['thinking', 'comments'],
 };
 
-export const getComments = (): GetCommentsResponse => {
+let lastDocumentTextCache: string | null = null;
+let lastCommentsCache: GetCommentsResponse = emptyComments;
+
+const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error(
@@ -44,9 +49,8 @@ export const getComments = (): GetCommentsResponse => {
     );
   }
 
-  const documentText = DocumentApp.getActiveDocument().getBody().getText();
   if (!documentText) {
-    return { comments: [] }; // No text, no comments
+    return emptyComments;
   }
 
   const systemPrompt = getCurrentPrompt();
@@ -75,7 +79,34 @@ export const getComments = (): GetCommentsResponse => {
     return { comments };
   } catch (e) {
     console.error('Error querying LLM or parsing response:', e);
-    // Consider more robust error handling or returning a specific error state
-    return { comments: [] }; // Return empty comments on error for now
+    return emptyComments;
   }
+};
+
+export const docopilotMainLoop = () => {
+  // TODO: Every second,
+  // if the document text changed, prompt the LLM for comments and save them somewhere accessible for getComments to retrieve. This way getComments can immediately return instead of waiting for the LLM
+};
+
+export const getComments = (): GetCommentsResponse => {
+  const currentDocumentText = DocumentApp.getActiveDocument()
+    .getBody()
+    .getText();
+
+  // Check cache
+  if (
+    currentDocumentText === lastDocumentTextCache &&
+    lastCommentsCache !== null // Ensure cache is populated
+  ) {
+    console.log('Returning cached comments.');
+    return lastCommentsCache;
+  }
+
+  console.log('Document changed, fetching new comments.');
+  lastDocumentTextCache = currentDocumentText;
+
+  const newComments = getCommentsFromLLM(currentDocumentText);
+  lastCommentsCache = newComments;
+
+  return newComments;
 };
