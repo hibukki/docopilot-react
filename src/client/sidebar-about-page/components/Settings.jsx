@@ -6,6 +6,11 @@ import {
   Box,
   Paper,
   useTheme,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
@@ -16,6 +21,10 @@ const Settings = ({ onError }) => {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [promptInput, setPromptInput] = useState('');
   const [currentPrompt, setCurrentPrompt] = useState('');
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState('');
+  const [currentModelDisplay, setCurrentModelDisplay] = useState('');
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   const fetchCurrentPrompt = () => {
     serverFunctions
@@ -26,8 +35,38 @@ const Settings = ({ onError }) => {
       });
   };
 
+  const fetchCurrentModel = () => {
+    serverFunctions
+      .getGeminiModel()
+      .then((model) => {
+        const display = model || 'Using default (gemini-1.5-flash-latest)';
+        setCurrentModelDisplay(display);
+        setSelectedModel(model || '');
+      })
+      .catch((err) => {
+        onError(err);
+        setCurrentModelDisplay('Error fetching model');
+      });
+  };
+
+  const fetchAvailableModels = () => {
+    setIsLoadingModels(true);
+    serverFunctions
+      .listAvailableModels()
+      .then(setAvailableModels)
+      .catch((err) => {
+        onError(err);
+        setAvailableModels([]);
+      })
+      .finally(() => {
+        setIsLoadingModels(false);
+      });
+  };
+
   useEffect(() => {
     fetchCurrentPrompt();
+    fetchCurrentModel();
+    fetchAvailableModels();
   }, []);
 
   const toggleSettings = () => {
@@ -54,6 +93,32 @@ const Settings = ({ onError }) => {
       .catch((err) => {
         onError(err);
       });
+  };
+
+  const handleSaveModel = () => {
+    if (!selectedModel) return;
+    serverFunctions
+      .setGeminiModel(selectedModel)
+      .then(() => {
+        fetchCurrentModel();
+      })
+      .catch((err) => {
+        onError(err);
+      });
+  };
+
+  const isModelSaveDisabled = () => {
+    if (isLoadingModels || !selectedModel) {
+      return true;
+    }
+    const currentActiveModel = currentModelDisplay.startsWith('Using default')
+      ? ''
+      : currentModelDisplay;
+
+    const match = currentActiveModel.match(/\(([^)]+)\)/);
+    const activeModelName = match ? match[1] : currentActiveModel;
+
+    return selectedModel === activeModelName;
   };
 
   return (
@@ -119,6 +184,38 @@ const Settings = ({ onError }) => {
         </Box>
         <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
           <Typography variant="body2" gutterBottom>
+            Gemini Model
+          </Typography>
+          {isLoadingModels ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+              <InputLabel id="model-select-label">Select Model</InputLabel>
+              <Select
+                labelId="model-select-label"
+                value={selectedModel}
+                label="Select Model"
+                onChange={(e) => setSelectedModel(e.target.value)}
+              >
+                {availableModels.map((model) => (
+                  <MenuItem key={model.name} value={model.name}>
+                    {model.displayName} ({model.name})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleSaveModel}
+            disabled={isModelSaveDisabled()}
+          >
+            Save Model
+          </Button>
+        </Box>
+        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
+          <Typography variant="body2" gutterBottom>
             Current Active Prompt:
           </Typography>
           <Paper
@@ -130,6 +227,22 @@ const Settings = ({ onError }) => {
               sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
             >
               {currentPrompt || 'Using default prompt'}
+            </Typography>
+          </Paper>
+        </Box>
+        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
+          <Typography variant="body2" gutterBottom>
+            Current Active Model:
+          </Typography>
+          <Paper
+            variant="outlined"
+            sx={{ p: 1, backgroundColor: theme.palette.background.default }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            >
+              {currentModelDisplay}
             </Typography>
           </Paper>
         </Box>

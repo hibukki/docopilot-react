@@ -1,6 +1,11 @@
 import { getDocText, highlightCommentsInDoc } from './doc';
 
-import { queryLLM, getGeminiApiKey, getCurrentPrompt } from './llms';
+import {
+  queryLLM,
+  getGeminiApiKey,
+  getCurrentPrompt,
+  getGeminiModel,
+} from './llms';
 import {
   GetCommentsResponse,
   emptyComments,
@@ -41,6 +46,8 @@ const llmResponseSchema = {
   required: ['thinking', 'comments'],
 };
 
+const DEFAULT_MODEL = 'gemini-1.5-flash-latest';
+
 export const onGotNewLLMComments = (commentsResponse: GetCommentsResponse) => {
   const quotes = commentsResponse.comments.map((c) => c.quoted_text);
   refreshCursorPosition();
@@ -66,7 +73,8 @@ const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
   const fullPrompt = `${systemPrompt}\n\nDocument Text:\n\`\`\`\n${documentText}\n\`\`\``;
 
   // TODO: Make model configurable?
-  const model = 'gemini-1.5-flash-latest';
+  const selectedModel = getGeminiModel();
+  const model = selectedModel || DEFAULT_MODEL;
 
   const llmResponseString = queryLLM(
     fullPrompt,
