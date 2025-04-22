@@ -7,11 +7,24 @@ const Comments = ({ onError }) => {
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
 
-  const fetchComments = () => {
-    console.log('Fetching comments');
-    serverFunctions
-      .getComments()
-      .then((response) => setComments(response.comments))
+  const fetchTick = () => {
+    console.log('Fetching comments and focused quote');
+    Promise.all([
+      serverFunctions.getComments(),
+      serverFunctions.getFocusedQuote(),
+    ])
+      .then(([commentsResponse, focusedQuote]) => {
+        setComments(commentsResponse.comments);
+
+        if (focusedQuote) {
+          const index = commentsResponse.comments.findIndex(
+            (c) => c.quoted_text === focusedQuote
+          );
+          setActiveCommentIndex(index !== -1 ? index : null);
+        } else {
+          setActiveCommentIndex(null);
+        }
+      })
       .catch((err) => {
         onError(err);
       });
@@ -23,8 +36,8 @@ const Comments = ({ onError }) => {
   };
 
   useEffect(() => {
-    fetchComments(); // Fetch immediately on mount
-    const commentsIntervalId = setInterval(fetchComments, 1000); // Fetch every second
+    fetchTick(); // Fetch immediately on mount
+    const commentsIntervalId = setInterval(fetchTick, 1000); // Fetch every second
     const tickIntervalId = setInterval(docopilotTick, 1000); // Call every second (because this backend can't trigger itself)
 
     return () => {
@@ -39,7 +52,7 @@ const Comments = ({ onError }) => {
         <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
           Comments
         </Typography>
-        <Button variant="outlined" size="small" onClick={fetchComments}>
+        <Button variant="outlined" size="small" onClick={fetchTick}>
           Refresh
         </Button>
       </Box>
@@ -51,7 +64,10 @@ const Comments = ({ onError }) => {
         comments.map((comment, i) => (
           <Paper
             key={i}
-            onClick={() => setActiveCommentIndex(i)}
+            onClick={() => {
+              setActiveCommentIndex(i);
+              serverFunctions.onSidebarCommentSetFocus(comment.quoted_text);
+            }}
             variant="outlined"
             sx={{
               p: 1,

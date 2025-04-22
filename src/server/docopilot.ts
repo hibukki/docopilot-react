@@ -111,7 +111,7 @@ export const getFocusedQuote = (): string | undefined => {
   return getCursorQuote();
 };
 
-export const sidebarSetFocusedQuote = (quote: string) => {
+export const onSidebarCommentSetFocus = (quote: string) => {
   setCachedCursorPosition({ quote, source: 'sidebar' });
 };
 

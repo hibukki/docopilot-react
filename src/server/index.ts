@@ -9,7 +9,12 @@ import {
   setUserPrompt,
   getCurrentPrompt,
 } from './llms';
-import { getComments, docopilotTick, getFocusedQuote } from './docopilot';
+import {
+  getComments,
+  docopilotTick,
+  getFocusedQuote,
+  onSidebarCommentSetFocus,
+} from './docopilot';
 
 // Public functions must be exported as named exports
 export {
@@ -29,4 +34,5 @@ export {
   getCurrentPrompt,
   docopilotTick,
   getFocusedQuote,
+  onSidebarCommentSetFocus,
 };
