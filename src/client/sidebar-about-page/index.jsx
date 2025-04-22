@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import Docopilot from './components/About';
+import Docopilot from './components/Docopilot';
 
 const container = document.getElementById('index');
 const root = createRoot(container);
