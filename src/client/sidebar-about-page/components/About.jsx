@@ -1,29 +1,33 @@
 import { Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { serverFunctions } from '../../utils/serverFunctions';
 
-const About = () => (
-  <div>
-    <p>
-      <b>☀️ React app inside a sidebar! omg ☀️</b>
-    </p>
-    <p>
-      This is a very simple page demonstrating how to build a React app inside a
-      sidebar.
-    </p>
-    <p>
-      Visit the Github repo for more information on how to use this project.
-    </p>
-    <p>- Elisha Nuchi</p>
-    <a
-      href="https://www.github.com/enuchi/React-Google-Apps-Script"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      React + Google Apps Script
-    </a>
-    <Typography variant="h4" gutterBottom>
-      MUI demo!
-    </Typography>
-  </div>
-);
+const About = () => {
+  const [query] = useState('');
+  const [response, setResponse] = useState('');
+
+  useEffect(() => {
+    serverFunctions.queryLLM(query).then(setResponse).catch(alert);
+  }, [query]);
+
+  return (
+    <div>
+      <p>
+        <b>☀️ React app inside a sidebar! omg ☀️</b>
+      </p>
+      <a
+        href="https://www.github.com/enuchi/React-Google-Apps-Script"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        React + Google Apps Script
+      </a>
+      <p>Query response: {response}</p>
+      <Typography variant="h4" gutterBottom>
+        MUI demo!
+      </Typography>
+    </div>
+  );
+};
 
 export default About;

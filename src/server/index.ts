@@ -2,6 +2,8 @@ import { onOpen, openAboutSidebar, openDialogMUI } from './ui';
 
 import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
 
+import { queryLLM } from './llms';
+
 // Public functions must be exported as named exports
 export {
   onOpen,
@@ -11,4 +13,5 @@ export {
   addSheet,
   deleteSheet,
   setActiveSheet,
+  queryLLM,
 };
