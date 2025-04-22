@@ -5,6 +5,7 @@ import { serverFunctions } from '../../utils/serverFunctions';
 const Docopilot = () => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
+  const [activeCommentIndex, setActiveCommentIndex] = useState(null);
 
   useEffect(() => {
     serverFunctions
@@ -19,15 +20,8 @@ const Docopilot = () => {
   return (
     <div>
       <p>
-        <b>☀️ React app inside a sidebar! omg3 ☀️</b>
+        <b>Docopilot - get comments on your doc from an LLM</b>
       </p>
-      <a
-        href="https://www.github.com/enuchi/React-Google-Apps-Script"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        React + Google Apps Script
-      </a>
       <Typography variant="h5" gutterBottom>
         Comments
       </Typography>
@@ -39,16 +33,23 @@ const Docopilot = () => {
         comments.map((comment, i) => (
           <Paper
             key={i}
+            onClick={() => setActiveCommentIndex(i)}
             variant="outlined"
             sx={{
               p: 1,
               mb: 1,
               borderLeft: `4px solid ${theme.palette.primary.main}`,
+              borderRadius: theme.shape.borderRadius,
+              cursor: 'pointer',
+              backgroundColor:
+                activeCommentIndex === i
+                  ? theme.palette.action.selected
+                  : 'transparent',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             }}
           >
-            <Typography variant="subtitle2" gutterBottom>
-              {comment.quoted_text}
-            </Typography>
             <Typography variant="body2">{comment.comment_text}</Typography>
           </Paper>
         ))
