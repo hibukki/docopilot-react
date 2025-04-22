@@ -19,11 +19,11 @@ const Comments = ({ onError }) => {
 
   useEffect(() => {
     fetchComments(); // Fetch immediately on mount
-    // const intervalId = setInterval(fetchComments, 1000); // Fetch every second
+    const intervalId = setInterval(fetchComments, 1000); // Fetch every second
 
-    // return () => {
-    //   clearInterval(intervalId); // Clear interval on unmount
-    // };
+    return () => {
+      clearInterval(intervalId); // Clear interval on unmount
+    };
   }, []);
 
   return (
