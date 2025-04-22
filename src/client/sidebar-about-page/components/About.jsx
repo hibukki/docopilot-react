@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 
-const About = () => {
+const Docopilot = () => {
   const [query] = useState('');
   const [response, setResponse] = useState('');
 
@@ -13,7 +13,7 @@ const About = () => {
   return (
     <div>
       <p>
-        <b>☀️ React app inside a sidebar! omg ☀️</b>
+        <b>☀️ React app inside a sidebar! omg3 ☀️</b>
       </p>
       <a
         href="https://www.github.com/enuchi/React-Google-Apps-Script"
@@ -30,4 +30,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Docopilot;
