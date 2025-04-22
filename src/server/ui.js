@@ -5,7 +5,6 @@ const getUi = () => {
 export const onOpen = () => {
   const menu = getUi()
     .createMenu('My Sample React Project') // edit me!
-    .addItem('Sheet Editor (MUI)', 'openDialogMUI')
     .addItem('Sidebar', 'openAboutSidebar');
 
   menu.addToUi();
