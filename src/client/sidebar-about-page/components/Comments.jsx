@@ -2,7 +2,7 @@ import { Typography, Paper, useTheme, Box } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 
-const Comments = () => {
+const Comments = ({ onError }) => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
@@ -12,8 +12,7 @@ const Comments = () => {
       .getComments()
       .then((response) => setComments(response.comments))
       .catch((err) => {
-        console.error('Error fetching comments:', err);
-        alert(`Error fetching comments: ${err.message || err}`);
+        onError(err);
       });
   };
 

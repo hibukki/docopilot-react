@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 
-const Settings = () => {
+const Settings = ({ onError }) => {
   const theme = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
@@ -22,8 +22,7 @@ const Settings = () => {
       .getCurrentPrompt()
       .then(setCurrentPrompt)
       .catch((err) => {
-        console.error('Error fetching current prompt:', err);
-        alert(`Error fetching current prompt: ${err.message || err}`);
+        onError(err);
       });
   };
 
@@ -39,12 +38,10 @@ const Settings = () => {
     serverFunctions
       .setGeminiApiKey(apiKeyInput)
       .then(() => {
-        alert('API Key saved successfully!');
-        setApiKeyInput(''); // Clear input after saving
+        setApiKeyInput('');
       })
       .catch((err) => {
-        console.error('Error saving API key:', err);
-        alert(`Error saving API key: ${err.message || err}`);
+        onError(err);
       });
   };
 
@@ -52,13 +49,10 @@ const Settings = () => {
     serverFunctions
       .setUserPrompt(promptInput)
       .then(() => {
-        alert('Prompt saved successfully!');
-        fetchCurrentPrompt(); // Re-fetch the current prompt to update display
-        // Optionally clear input: setPromptInput('');
+        fetchCurrentPrompt();
       })
       .catch((err) => {
-        console.error('Error saving prompt:', err);
-        alert(`Error saving prompt: ${err.message || err}`);
+        onError(err);
       });
   };
 
