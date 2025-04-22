@@ -17,6 +17,7 @@ import {
   getFocusedQuote,
   onSidebarCommentSetFocus,
 } from './docopilot';
+import { refreshCursorPosition } from './doc_cursor';
 
 // Public functions must be exported as named exports
 export {
@@ -36,4 +37,5 @@ export {
   listAvailableModels,
   getGeminiModel,
   setGeminiModel,
+  refreshCursorPosition,
 };

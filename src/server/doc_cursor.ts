@@ -15,20 +15,38 @@ const findQuoteIndexAtCursor = (
   cursor: GoogleAppsScript.Document.Position
 ): number => {
   const cursorElement = cursor.getElement();
-  if (cursorElement.getType() !== DocumentApp.ElementType.TEXT) {
-    return -1;
-  }
-  const cursorTextElement = cursorElement.asText();
-  const cursorText = cursorTextElement.getText();
+  const cursorOffset = cursor.getOffset();
+  const body = DocumentApp.getActiveDocument().getBody();
 
-  // Check if any of the quotes contain or are contained by the cursor text
   for (let i = 0; i < quotes.length; i += 1) {
     const quote = quotes[i];
-    if (cursorText.includes(quote)) {
-      return i;
+    if (quote) {
+      // Only search if the quote is not empty
+      let searchResult = body.findText(quote);
+      while (searchResult !== null) {
+        const foundElement = searchResult.getElement();
+        const startOffset = searchResult.getStartOffset();
+        const endOffset = searchResult.getEndOffsetInclusive();
+
+        // Check if the cursor is within the bounds of this found text range
+        // Offset is the position *before* the cursor
+        if (
+          foundElement.getType() === cursorElement.getType() &&
+          foundElement.asText().getText() ===
+            cursorElement.asText().getText() && // Ensure it's the exact same element
+          cursorOffset > startOffset &&
+          cursorOffset <= endOffset + 1
+        ) {
+          return i; // Cursor is within this quote occurrence
+        }
+
+        // Find the next occurrence
+        searchResult = body.findText(quote, searchResult);
+      }
     }
   }
-  return -1;
+
+  return -1; // No matching quote found at cursor position
 };
 
 export const onCursorChanged = (
@@ -59,7 +77,7 @@ export const onCursorChanged = (
   setCachedCursorPosition(currentCursorPosition);
 };
 
-export const refreshCursorPosition = () => {
+export const refreshCursorPosition = (): void => {
   const cursor = getCursorPosition();
   //   const cachedCursorPosition = getCachedCursorPosition();
   //   if (cachedCursorPosition === cursor) {
