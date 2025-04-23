@@ -45,7 +45,7 @@ const llmResponseSchema = {
   required: ['thinking', 'comments'],
 };
 
-const DEFAULT_MODEL = 'gemini-2.0-flash-thinking-exp-01-21';
+const DEFAULT_MODEL = 'gemini-2.0-flash-thinking-exp-1219';
 
 export const onGotNewLLMComments = (commentsResponse: GetCommentsResponse) => {
   const quotes = commentsResponse.comments.map((c) => c.quoted_text);

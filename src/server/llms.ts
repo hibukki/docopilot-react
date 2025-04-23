@@ -120,6 +120,10 @@ export const listAvailableModels = () => {
     .filter((model: GeminiModelInfo) =>
       model.supportedGenerationMethods.includes('generateContent')
     )
+    .map((model: GeminiModelInfo) => {
+      // console.log(model);
+      return model;
+    })
     .map((model: GeminiModelInfo) => ({
       name: model.name.replace('models/', ''), // Store simplified name e.g. 'gemini-1.5-flash-latest'
       displayName: model.displayName,
