@@ -11,6 +11,7 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
+  Link,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
@@ -39,7 +40,7 @@ const Settings = ({ onError }) => {
     serverFunctions
       .getGeminiModel()
       .then((model) => {
-        const display = model || 'Using default (gemini-1.5-flash-latest)';
+        const display = model || 'Using default';
         setCurrentModelDisplay(display);
         setSelectedModel(model || '');
       })
@@ -162,6 +163,15 @@ const Settings = ({ onError }) => {
           >
             Save Key
           </Button>
+          <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+            <Link
+              href="https://ai.google.dev/gemini-api/docs/api-key"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              How to get a Gemini API Key
+            </Link>
+          </Typography>
         </Box>
         <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
           <Typography variant="body2" gutterBottom>
@@ -199,7 +209,9 @@ const Settings = ({ onError }) => {
               >
                 {availableModels.map((model) => (
                   <MenuItem key={model.name} value={model.name}>
-                    {model.displayName} ({model.name})
+                    <Typography variant="caption">
+                      {model.displayName} ({model.name})
+                    </Typography>
                   </MenuItem>
                 ))}
               </Select>
