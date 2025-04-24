@@ -96,10 +96,32 @@ const getCommentsFromLLM = (documentText: string): GetCommentsResponse => {
 };
 
 export const getComments = (): GetCommentsResponse => {
-  const currentDocumentText = getDocText();
-  const cachedDocumentText = getCachedDocumentText();
+  const cachedComments = getCachedComments();
 
-  if (cachedDocumentText === currentDocumentText) {
+  if (!cachedComments) {
+    return emptyComments;
+  }
+
+  return cachedComments;
+};
+
+export const refreshCommentsIfNeeded = (): GetCommentsResponse => {
+  const cachedDocument = getCachedDocumentText();
+  const currentDocumentText = getDocText();
+
+  // If the document CHANGED in the last 500 ms then debounce (wait for next time)
+  if (
+    cachedDocument &&
+    cachedDocument.updated_at > Date.now() - 500 &&
+    cachedDocument.text !== currentDocumentText
+  ) {
+    const cachedComments = getCachedComments();
+    if (cachedComments) {
+      return cachedComments;
+    }
+  }
+
+  if (cachedDocument && cachedDocument.text === currentDocumentText) {
     const cachedComments = getCachedComments();
     if (cachedComments) {
       return cachedComments;
@@ -118,5 +140,5 @@ export const getComments = (): GetCommentsResponse => {
 export const docopilotTick = () => {
   console.log('docopilotTick');
   refreshCursorPosition();
-  getComments();
+  refreshCommentsIfNeeded();
 };

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { GetCommentsResponse } from './get_comments_response_type';
 
 export type CursorSource = 'document' | 'sidebar';
@@ -12,15 +13,38 @@ export interface DocCursorPosition extends CursorPosition {
   source: 'document';
 }
 
+const CachedDocumentSchema = z.object({
+  text: z.string(),
+  updated_at: z.number(), // Unix timestamp in milliseconds
+});
+
+export type CachedDocument = z.infer<typeof CachedDocumentSchema>;
+
+const LAST_DOCUMENT_CACHE_KEY = 'lastDocumentCache';
+
 // Means document text that we generated comments for.
 export const setCachedDocumentText = (text: string): void => {
   const scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty('lastDocumentTextCache', text);
+  const cachedDoc: CachedDocument = {
+    text,
+    updated_at: Date.now(),
+  };
+  scriptProperties.setProperty(
+    LAST_DOCUMENT_CACHE_KEY,
+    JSON.stringify(cachedDoc)
+  );
 };
 
-export const getCachedDocumentText = (): string | null => {
+export const getCachedDocumentText = (): CachedDocument | null => {
   const scriptProperties = PropertiesService.getScriptProperties();
-  return scriptProperties.getProperty('lastDocumentTextCache');
+  const cachedDocString = scriptProperties.getProperty(LAST_DOCUMENT_CACHE_KEY);
+  if (!cachedDocString) {
+    return null;
+  }
+  const parsedJson = JSON.parse(cachedDocString);
+  // Zod's parse will throw an error if validation fails
+  const cachedDoc = CachedDocumentSchema.parse(parsedJson);
+  return cachedDoc;
 };
 
 export const getCachedComments = (): GetCommentsResponse | null => {
