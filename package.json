@@ -24,7 +24,6 @@
     "deploy": "yarn build && yarn push",
     "deploy:watch": "npx nodemon --watch src -e js,jsx,ts,tsx,html,css --exec 'npm run deploy'",
     "start": "yarn deploy:dev && yarn dev"
-    
   },
   "keywords": [
     "react",
@@ -48,7 +47,8 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.4.0",
     "react-dom": "^18.2.0",
-    "react-transition-group": "^4.4.2"
+    "react-transition-group": "^4.4.2",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.6",
