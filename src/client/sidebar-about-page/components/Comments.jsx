@@ -6,6 +6,7 @@ const Comments = ({ onError }) => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
+  const [quoteOverrideBySidebar, setQuoteOverrideBySidebar] = useState(null);
 
   const fetchTick = () => {
     console.log('Fetching comments and focused quote');
@@ -13,12 +14,20 @@ const Comments = ({ onError }) => {
       serverFunctions.getComments(),
       serverFunctions.getCursorQuote(),
     ])
-      .then(([commentsResponse, focusedQuote]) => {
+      .then(([commentsResponse, focusedQuoteFromServer]) => {
         setComments(commentsResponse.comments);
 
-        if (focusedQuote) {
+        if (quoteOverrideBySidebar) {
+          if (focusedQuoteFromServer === quoteOverrideBySidebar) {
+            setQuoteOverrideBySidebar(null); // The server got updated by the sidebar click, nothing more to remember, the server is the source of truth again
+          } else {
+            return; // Ignore the quote from the server, it isn't updated by the sidebar click
+          }
+        }
+
+        if (focusedQuoteFromServer) {
           const index = commentsResponse.comments.findIndex(
-            (c) => c.quoted_text === focusedQuote
+            (c) => c.quoted_text === focusedQuoteFromServer
           );
           setActiveCommentIndex(index !== -1 ? index : null);
         } else {
@@ -31,7 +40,6 @@ const Comments = ({ onError }) => {
   };
 
   const docopilotTick = () => {
-    console.log('Docopilot tick');
     serverFunctions.docopilotTick();
   };
 
@@ -44,7 +52,7 @@ const Comments = ({ onError }) => {
       clearInterval(commentsIntervalId);
       clearInterval(tickIntervalId);
     };
-  }, []);
+  }, [quoteOverrideBySidebar, activeCommentIndex]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -65,7 +73,10 @@ const Comments = ({ onError }) => {
           <Paper
             key={i}
             onClick={() => {
+              console.log('onClick', comment.quoted_text);
+              setQuoteOverrideBySidebar(comment.quoted_text); // The sidebar is deciding a quote which is different from the server, and it will take the server a moment to update, so remember which quote this is
               setActiveCommentIndex(i);
+              setQuoteOverrideBySidebar(comment.quoted_text);
               serverFunctions.onSidebarCommentSetFocus(comment.quoted_text);
             }}
             variant="outlined"
