@@ -36,6 +36,10 @@ Use the "Docopilot" menu.
 
 See package.json
 
+### Screenshot
+
+<img width="1410" alt="image" src="https://github.com/user-attachments/assets/99c5b035-cbf2-42ab-ab3d-f9330a0a4da8" />
+
 ## This project is a fork
 
 Of the amazing template [https://github.com/52inc/TypeScript-React-Google-Apps-Script](https://github.com/52inc/TypeScript-React-Google-Apps-Script).
