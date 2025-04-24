@@ -40,6 +40,10 @@ See package.json
 
 <img width="1410" alt="image" src="https://github.com/user-attachments/assets/99c5b035-cbf2-42ab-ab3d-f9330a0a4da8" />
 
+Settings:
+
+<img width="329" alt="image" src="https://github.com/user-attachments/assets/96875fe7-fec0-4bba-9652-1e3ee966a6d9" />
+
 ## This project is a fork
 
 Of the amazing template [https://github.com/52inc/TypeScript-React-Google-Apps-Script](https://github.com/52inc/TypeScript-React-Google-Apps-Script).
