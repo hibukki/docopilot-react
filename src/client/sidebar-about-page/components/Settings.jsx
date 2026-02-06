@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
+import { STORAGE_KEYS, DEFAULT_MODEL, DEFAULT_PROMPT } from '../../utils/constants';
 
 const Settings = ({ onError }) => {
   const theme = useTheme();
@@ -29,18 +30,16 @@ const Settings = ({ onError }) => {
 
   const fetchCurrentPrompt = () => {
     serverFunctions
-      .getCurrentPrompt()
-      .then(setCurrentPrompt)
-      .catch((err) => {
-        onError(err);
-      });
+      .getPersistentStorage(STORAGE_KEYS.USER_PROMPT)
+      .then((stored) => setCurrentPrompt(stored || DEFAULT_PROMPT))
+      .catch((err) => onError(err));
   };
 
   const fetchCurrentModel = () => {
     serverFunctions
-      .getGeminiModel()
+      .getPersistentStorage(STORAGE_KEYS.MODEL)
       .then((model) => {
-        const display = model || 'Using default';
+        const display = model || `Default (${DEFAULT_MODEL})`;
         setCurrentModelDisplay(display);
         setSelectedModel(model || '');
       })
@@ -53,15 +52,13 @@ const Settings = ({ onError }) => {
   const fetchAvailableModels = () => {
     setIsLoadingModels(true);
     serverFunctions
-      .listAvailableModels()
+      .listModels()
       .then(setAvailableModels)
       .catch((err) => {
         onError(err);
         setAvailableModels([]);
       })
-      .finally(() => {
-        setIsLoadingModels(false);
-      });
+      .finally(() => setIsLoadingModels(false));
   };
 
   useEffect(() => {
@@ -70,56 +67,34 @@ const Settings = ({ onError }) => {
     fetchAvailableModels();
   }, []);
 
-  const toggleSettings = () => {
-    setSettingsOpen(!settingsOpen);
-  };
-
   const handleSaveApiKey = () => {
     serverFunctions
-      .setGeminiApiKey(apiKeyInput)
-      .then(() => {
-        setApiKeyInput('');
-      })
-      .catch((err) => {
-        onError(err);
-      });
+      .setPersistentStorage(STORAGE_KEYS.API_KEY, apiKeyInput)
+      .then(() => setApiKeyInput(''))
+      .catch((err) => onError(err));
   };
 
   const handleSavePrompt = () => {
     serverFunctions
-      .setUserPrompt(promptInput)
-      .then(() => {
-        fetchCurrentPrompt();
-      })
-      .catch((err) => {
-        onError(err);
-      });
+      .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, promptInput)
+      .then(() => fetchCurrentPrompt())
+      .catch((err) => onError(err));
   };
 
   const handleSaveModel = () => {
     if (!selectedModel) return;
     serverFunctions
-      .setGeminiModel(selectedModel)
-      .then(() => {
-        fetchCurrentModel();
-      })
-      .catch((err) => {
-        onError(err);
-      });
+      .setPersistentStorage(STORAGE_KEYS.MODEL, selectedModel)
+      .then(() => fetchCurrentModel())
+      .catch((err) => onError(err));
   };
 
   const isModelSaveDisabled = () => {
-    if (isLoadingModels || !selectedModel) {
-      return true;
-    }
-    const currentActiveModel = currentModelDisplay.startsWith('Using default')
+    if (isLoadingModels || !selectedModel) return true;
+    const currentActiveModel = currentModelDisplay.startsWith('Default')
       ? ''
       : currentModelDisplay;
-
-    const match = currentActiveModel.match(/\(([^)]+)\)/);
-    const activeModelName = match ? match[1] : currentActiveModel;
-
-    return selectedModel === activeModelName;
+    return selectedModel === currentActiveModel;
   };
 
   return (
@@ -134,7 +109,7 @@ const Settings = ({ onError }) => {
           borderBottom: `1px solid ${theme.palette.divider}`,
           pb: 1,
         }}
-        onClick={toggleSettings}
+        onClick={() => setSettingsOpen(!settingsOpen)}
       >
         <Typography variant="subtitle1">
           {settingsOpen ? '[-] Settings' : '[+] Settings'}
