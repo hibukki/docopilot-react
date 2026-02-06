@@ -1,7 +1,6 @@
-import { onOpen, openAboutSidebar, openDialogMUI } from './ui';
+import { onOpen, openAboutSidebar } from './ui';
 
 import {
-  queryLLM,
   getGeminiApiKey,
   setGeminiApiKey,
   getUserPrompt,
@@ -21,9 +20,7 @@ import {
 // Public functions must be exported as named exports
 export {
   onOpen,
-  openDialogMUI,
   openAboutSidebar,
-  queryLLM,
   getComments,
   getGeminiApiKey,
   setGeminiApiKey,

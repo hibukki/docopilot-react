@@ -16,11 +16,6 @@ const devServerWrapper = './dev/dev-server-wrapper.html';
 
 const clientEntrypoints = [
   {
-    name: 'CLIENT - Dialog Demo MUI',
-    filename: 'dialog-demo-mui',
-    template: 'dialog-demo-mui/index.html',
-  },
-  {
     name: 'CLIENT - Sidebar About Page',
     filename: 'sidebar-about-page',
     template: 'sidebar-about-page/index.html',
