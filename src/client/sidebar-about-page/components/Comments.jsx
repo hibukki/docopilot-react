@@ -1,58 +1,61 @@
-import { Typography, Paper, useTheme, Box, Button } from '@mui/material';
-import { useState, useEffect } from 'react';
+import {
+  Typography,
+  Paper,
+  useTheme,
+  Box,
+  Button,
+  CircularProgress,
+} from '@mui/material';
+import { useState } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
+import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
+import { LLMResponseSchema, llmResponseJsonSchema } from '../../utils/llmSchema';
 
 const Comments = ({ onError }) => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
-  const [quoteOverrideBySidebar, setQuoteOverrideBySidebar] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchTick = () => {
-    console.log('Fetching comments and focused quote');
-    Promise.all([
-      serverFunctions.getComments(),
-      serverFunctions.getCursorQuote(),
-    ])
-      .then(([commentsResponse, focusedQuoteFromServer]) => {
-        setComments(commentsResponse.comments);
+  const handleGetComments = async () => {
+    setIsLoading(true);
+    try {
+      const [docText, storedPrompt] = await Promise.all([
+        serverFunctions.getDocContent(),
+        serverFunctions.getPersistentStorage(STORAGE_KEYS.USER_PROMPT),
+      ]);
 
-        if (quoteOverrideBySidebar) {
-          if (focusedQuoteFromServer === quoteOverrideBySidebar) {
-            setQuoteOverrideBySidebar(null); // The server got updated by the sidebar click, nothing more to remember, the server is the source of truth again
-          } else {
-            return; // Ignore the quote from the server, it isn't updated by the sidebar click
-          }
-        }
+      const prompt = storedPrompt || DEFAULT_PROMPT;
+      const fullPrompt = `${prompt}\n\nDocument Text:\n\`\`\`\n${docText}\n\`\`\``;
 
-        if (focusedQuoteFromServer) {
-          const index = commentsResponse.comments.findIndex(
-            (c) => c.quoted_text === focusedQuoteFromServer
-          );
-          setActiveCommentIndex(index !== -1 ? index : null);
-        } else {
-          setActiveCommentIndex(null);
-        }
-      })
-      .catch((err) => {
-        onError(err);
-      });
+      const rawResponse = await serverFunctions.queryLLM(
+        fullPrompt,
+        llmResponseJsonSchema
+      );
+      const parsed = LLMResponseSchema.parse(JSON.parse(rawResponse));
+
+      setComments(parsed.comments);
+      setActiveCommentIndex(null);
+
+      const allQuotes = parsed.comments.map((c) => c.quote);
+      await serverFunctions.highlightQuotesInDoc(allQuotes, null);
+    } catch (err) {
+      onError(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const docopilotTick = () => {
-    serverFunctions.docopilotTick();
+  const handleCommentClick = async (comment, index) => {
+    setActiveCommentIndex(index);
+    const allQuotes = comments.map((c) => c.quote);
+    try {
+      await serverFunctions.highlightQuotesInDoc(allQuotes, comment.quote);
+      await serverFunctions.moveCursorToQuote(comment.quote);
+    } catch (err) {
+      onError(err);
+    }
   };
-
-  useEffect(() => {
-    fetchTick(); // Fetch immediately on mount
-    const commentsIntervalId = setInterval(fetchTick, 1000); // Fetch every second
-    const tickIntervalId = setInterval(docopilotTick, 1000); // Call every second (because this backend can't trigger itself)
-
-    return () => {
-      clearInterval(commentsIntervalId);
-      clearInterval(tickIntervalId);
-    };
-  }, [quoteOverrideBySidebar, activeCommentIndex]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -60,25 +63,25 @@ const Comments = ({ onError }) => {
         <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
           Comments
         </Typography>
-        <Button variant="outlined" size="small" onClick={fetchTick}>
-          Refresh
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleGetComments}
+          disabled={isLoading}
+          startIcon={isLoading ? <CircularProgress size={16} /> : null}
+        >
+          {isLoading ? 'Loading...' : 'Get Comments'}
         </Button>
       </Box>
       {comments.length === 0 ? (
         <Typography variant="body2" color="textSecondary">
-          No comments found.
+          No comments yet. Click "Get Comments" to analyze the document.
         </Typography>
       ) : (
         comments.map((comment, i) => (
           <Paper
             key={i}
-            onClick={() => {
-              console.log('onClick', comment.quoted_text);
-              setQuoteOverrideBySidebar(comment.quoted_text); // The sidebar is deciding a quote which is different from the server, and it will take the server a moment to update, so remember which quote this is
-              setActiveCommentIndex(i);
-              setQuoteOverrideBySidebar(comment.quoted_text);
-              serverFunctions.onSidebarCommentSetFocus(comment.quoted_text);
-            }}
+            onClick={() => handleCommentClick(comment, i)}
             variant="outlined"
             sx={{
               p: 1.5,
@@ -102,7 +105,7 @@ const Comments = ({ onError }) => {
               },
             }}
           >
-            <Typography variant="body2">{comment.comment_text}</Typography>
+            <Typography variant="body2">{comment.comment}</Typography>
           </Paper>
         ))
       )}
